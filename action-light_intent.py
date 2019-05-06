@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import json
+import yaml
 from hermes_python.hermes import Hermes
 from lights_controller import turn_light_on
 
