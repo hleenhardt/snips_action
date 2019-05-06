@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import json
 from hermes_python.hermes import Hermes
 from lights_controller import turn_light_on
 
@@ -20,11 +21,8 @@ logger.addHandler(handler)
 def intent_received(hermes, intent_message):
     sentence = "J'allume "
 
-    file = open("/tmp/test_log.txt","w")
-    file.write("{}\n".format(intent_message))
-    file.close()
     if "allumerLaLumiere" in intent_message.intent.intent_name:
-        rooms = process_turn_lights_on_intent(intent_message.intent.slots)
+        rooms = process_turn_lights_on_intent(intent_message.slots)
     else:
         return
 
@@ -42,10 +40,11 @@ def process_turn_lights_on_intent(slots):
         - rooms <list> : list of room's name
     """
     rooms = []
-    for slot in slots:
-        if slot.slotName != "piece":
+    slots_as_json = json.loads(slots)
+    for slot in slots_as_json:
+        if slot["slotName"] != "piece":
             logger.error("Wrong slot type for this intent [slot_type={} ; intent=allumerLaLumiere]".format(slot.slotName))
-        room = slot.value.value
+        room = slot["rawValue"]
         rooms.append(room)
 
     turn_light_on(rooms)
