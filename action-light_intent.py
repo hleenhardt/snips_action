@@ -10,6 +10,7 @@ MQTT_IP_ADDR = "localhost"
 MQTT_PORT = 1883
 MQTT_ADDR = "{}:{}".format(MQTT_IP_ADDR, str(MQTT_PORT))
 
+# Logger creation
 logger    = logging.getLogger("Light Intent")
 handler   = logging.FileHandler("/tmp/snips_user_logs", mode="a", encoding="utf-8")
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s : %(message)s')
@@ -17,16 +18,24 @@ handler.setFormatter(formatter)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
+# Config loading
+with open("word_gender_specifier.yaml", 'r') as stream:
+    try:
+        word_gender_specifier = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+
+
+# Utility Fonctions
 
 def intent_received(hermes, intent_message):
-    sentence = "Ok, J'allume "
+    sentence = ""
 
     if "allumerLaLumiere" in intent_message.intent.intent_name:
-        rooms = process_turn_lights_on_intent(intent_message.slots)
+        sentence = process_turn_lights_on_intent(intent_message.slots)            
     else:
         return
 
-    sentence += ",".join(rooms)
     hermes.publish_end_session(intent_message.session_id, sentence)
 
 
@@ -37,12 +46,17 @@ def process_turn_lights_on_intent(slots):
     INPUT:
         - slots <list> : list of all the room for which we need to turn the lights on
     OUPUT:
-        - room_names <list> : list of all the name for the room we lit
+        - sentence <str> : the sentence to tell the user
     """
+    sentence = "Ok j'allume "
     room_names = []
 
     # Gives all the value for the slot "room" of the intent
     room_object_list = slots.room.all()
+
+    # There must be at least one room to light
+    if len(room_object_list) == 0:
+        return "Désolé mais tu n'as pas spécifié de pièce. Je ne peux rien allumer"
 
     # We retrieve the names of all the room to ligth
     for room in room_object_list:
@@ -51,7 +65,13 @@ def process_turn_lights_on_intent(slots):
 
     # We got the names of all the room to light. We do the actual "light on" command
     turn_light_on(room_names)
-    return room_names
+
+    # Creation of the sentence for the user
+    for room_name in room_names[:-1]:
+        sentence += "{} {} ".format(word_gender_specifier[room_name], room_name) 
+    sentence += "et {} {}".format(word_gender_specifier[room_names[-1]], room_name[-1]) 
+    
+    return sentence
 
 
 
