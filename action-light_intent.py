@@ -19,7 +19,7 @@ logger.addHandler(handler)
 
 
 def intent_received(hermes, intent_message):
-    sentence = "J'allume "
+    sentence = "Ok, J'allume "
 
     if "allumerLaLumiere" in intent_message.intent.intent_name:
         rooms = process_turn_lights_on_intent(intent_message.slots)
@@ -37,22 +37,25 @@ def process_turn_lights_on_intent(slots):
     INPUT:
         - slots <list> : list of all the room for which we need to turn the lights on
     OUPUT:
-        - rooms <list> : list of room's name
+        - room_names <list> : list of all the name for the room we lit
     """
-    rooms = []
-    slots_as_json = json.loads(slots)
-    for slot in slots_as_json:
-        if slot["slotName"] != "piece":
-            logger.error("Wrong slot type for this intent [slot_type={} ; intent=allumerLaLumiere]".format(slot.slotName))
-        room = slot["rawValue"]
-        rooms.append(room)
+    room_names = []
 
-    turn_light_on(rooms)
-    return rooms
+    # Gives all the value for the slot "room" of the intent
+    room_object_list = slots.room.all()
+
+    # We retrieve the names of all the room to ligth
+    for room in room_object_list:
+        room_name = room.value
+        room_names.append(room_name)
+
+    # We got the names of all the room to light. We do the actual "light on" command
+    turn_light_on(room_names)
+    return room_names
 
 
 
-
+#### Main ####
 with Hermes(MQTT_ADDR) as h:
     print("Starting")
     h.subscribe_intents(intent_received).start()
