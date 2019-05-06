@@ -67,9 +67,13 @@ def process_turn_lights_on_intent(slots):
     turn_light_on(room_names)
 
     # Creation of the sentence for the user
-    for room_name in room_names[:-1]:
-        sentence += "{} {} ".format(word_gender_specifier[room_name], room_name) 
-    sentence += "et {} {}".format(word_gender_specifier[room_names[-1]], room_name[-1]) 
+    sentence_end = "{} {}".format(word_gender_specifier[room_names[-1]], room_name[-1])
+    
+    if len(room_names) > 1:
+        for room_name in room_names[:-1]:
+            sentence += "{} {} ".format(word_gender_specifier[room_name], room_name) 
+        sentence += "et "
+    sentence += sentence_end 
     
     return sentence
 
