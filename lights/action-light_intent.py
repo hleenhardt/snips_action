@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 # Config loading
-with open("word_gender_specifier.yaml", 'r') as stream:
+with open("../word_gender_specifier.yaml", 'r') as stream:
     try:
         word_gender_specifier = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
