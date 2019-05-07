@@ -4,7 +4,7 @@
 import logging
 import yaml
 from hermes_python.hermes import Hermes
-from lights_controller import turn_light_on
+from lights.lights_controller import turn_light_on
 
 MQTT_IP_ADDR = "localhost"
 MQTT_PORT = 1883
@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 # Config loading
-with open("../word_gender_specifier.yaml", 'r') as stream:
+with open("word_gender_specifier.yaml", 'r') as stream:
     try:
         word_gender_specifier = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
@@ -32,7 +32,7 @@ def intent_received(hermes, intent_message):
     sentence = ""
 
     if "allumerLaLumiere" in intent_message.intent.intent_name:
-        sentence = process_turn_lights_on_intent(intent_message.slots)            
+        sentence = process_turn_lights_on_intent(intent_message.slots)
     else:
         return
 
